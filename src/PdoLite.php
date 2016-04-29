@@ -375,16 +375,37 @@ class PdoLite {
     }
 
      /* 
+     * merge and intersec array with schema
+     * @param table, $array  
+     * @return array of assoc
+     */ 
+    public static function schemaBasedArray($tname, $iArray) {
+
+        if (empty($tname) or empty($iArray)) return array();
+        $fields = self::schema($tname);
+        return self::aIntersec(array_merge($fields, $iArray), $fields);
+    }  
+
+     /* 
+     * array to fields list for sql select
+     * @param $array  
+     * @return string title, maker
+     */ 
+    public static function a2SelStr($iArray) {
+
+        return implode(", ", array_keys($iArray));
+    }
+    
+     /* 
      * array to fields list for sql update
-     * @param $array $checkNumArray 
+     * @param $array  
      * @return string 
      */ 
-    public static function a2UptStr($iArray, $checkNumArray = array()) {
+    public static function a2UptStr($iArray) {
 
         $str = "";
         while (list($key, $val) = each($iArray)) {
-            // set to "0" only in the $checkNumArray and is empty
-            if (isset($checkNumArray[$key]) and $key == $checkNumArray[$key] and empty($val)) {
+            if (empty($val) and (gettype($val)=="integer" or gettype($val)=="double")) {
                 $val = "0"; 
             }
             // concat fields list for sql update
@@ -393,7 +414,7 @@ class PdoLite {
         // return maker= 'Name', acct= '15',
         return substr($str, 0, strlen($str) - 2); // take out comma and space
     }
-    
+
      /* 
      * array to sql insert statement
      * @param $array  

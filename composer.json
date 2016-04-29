@@ -14,12 +14,12 @@
     },
     "autoload": {
         "psr-4": {
-            "PdoLite\\": "/"
+            "PdoLite\\": "/src"
         }
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "1.0.x-dev"
+            "dev-master": "1.0.0"
         }
     }
 }

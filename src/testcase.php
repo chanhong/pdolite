@@ -3,7 +3,7 @@ include ('pdolite.php');
 
 use PdoLite\PdoLite;
 
-const DB_SQLITE = 'sqlite:db/mydb.sqlite';
+const DB_SQLITE = 'sqlite:../db/mydb.sqlite';
 const DB_MYSQL = 'mysql:host=localhost;port=3306;;dbname=bookshelf';
 
 $dsn = DB_SQLITE;
@@ -26,18 +26,32 @@ $results = PdoLite::exec("update books set title='Gregor the Overlander' where i
 print_r($results); 
 
 // current test case
-$iArray =[ 'x'=>'x', 'id'=>1, 'name' => 'some name', 'biography' => 'some bio'
+$iArray =[ 'x'=>null, 'name' => 'some name', 'biography' => 'some bio'
  ,  'csrf_name' => 'csrf1280394586',  'csrf_value' => 'ccf28ee0ddd73'];
-$fields = PdoLite::schema("authors");
-$fieldsList = PdoLite::a2UptStr(PdoLite::aIntersec($iArray, $fields));
-echo "<br />upd: ";
-print_r($fieldsList);
-$fieldsList = PdoLite::a2InsStr(PdoLite::aIntersec($iArray, $fields));
-echo "<br />ins: ";
-print_r($fieldsList);
-$fieldsList = PdoLite::a2InsStr(PdoLite::aIntersec($iArray));
+$fieldsList = PdoLite::a2InsStr($iArray);
 echo "<br />no filter ins: ";
 print_r($fieldsList);
+$fieldsList = PdoLite::a2UptStr($iArray);
+echo "<br />no filter upd: ";
+print_r($fieldsList);
+
+$one = PdoLite::schemaBasedArray("authors", $iArray);
+$fields = PdoLite::schema("authors","_none");
+echo "<br />schema: ";
+print_r($fields);
+echo "<br />schema based: ";
+print_r($one);
+
+$fieldsList = PdoLite::a2SelStr($one);
+echo "<br />sel: ";
+print_r($fieldsList);
+$fieldsList = PdoLite::a2InsStr($one);
+echo "<br />ins: ";
+print_r($fieldsList);
+$fieldsList = PdoLite::a2UptStr($one);
+echo "<br />upd: ";
+print_r($fieldsList);
+
 
 // old test case
 $sql = "SELECT * FROM books where id <3"; 
