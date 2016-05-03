@@ -10,7 +10,7 @@ const DB_SQLSRV = 'sqlsrv:server=uwmca-db1;Database=bookshelf';
 $dsn = DB_SQLSRV;
 
 $user = 'user';
-$passwd = 'password';
+$passwd = 'user';
 
 defined('PDOLITE_DB_DSN') or define('PDOLITE_DB_DSN', $dsn);
 defined('PDOLITE_DB_USER') or define('PDOLITE_DB_USER', $user);
