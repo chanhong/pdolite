@@ -1,9 +1,13 @@
 <?php
 /*
 // Must set three const or use dbConnect 
-const PDOLITE_DB_USER = 'dbuser';
-const PDOLITE_DB_PASS = 'dbpass';
-const PDOLITE_DB_DSN = 'sqlite:db/mydb.sqlite';
+const DB_SQLITE = 'sqlite:db/mydb.sqlite';
+const DB_MYSQL = 'mysql:host=localhost;port=3306;;dbname=bookshelf';
+const DB_SQLSRV = 'sqlsrv:server=(local);Database=bookshelf';
+
+defined('PDOLITE_DB_DSN') or define('PDOLITE_DB_DSN', $dsn);
+defined('PDOLITE_DB_USER') or define('PDOLITE_DB_USER', $user);
+defined('PDOLITE_DB_PASS') or define('PDOLITE_DB_PASS', $passwd);
 
 // Sample code using New Ojbect call
 
@@ -158,11 +162,21 @@ class PdoLite {
      * @param $table, $field 
      * @return $integer 
      */ 
-    public static function getNextId($table, $field) {
+    public static function getLastId($table, $field) {
 
         $sql = 'SELECT max(' . $field . ') as lastid FROM ' . $table;
         list($lastid) = self::dbFetch(self::query($sql), "num"); // cause warning when use assoc array
-        return (int) $lastid + 1;
+        return (int) $lastid;
+    }
+
+    /* 
+     * call query and dbFetch num to get lastID 
+     * @param $table, $field 
+     * @return $integer 
+     */ 
+    public static function getNextId($table, $field) {
+
+        return self::getLastId($table, $field) +1;
     }
 
     /* 
@@ -345,10 +359,10 @@ class PdoLite {
 
     /* 
      * get one row from table
-     * @param $table 
-     * @return assoc array of fields 
+     * @param $table $filter
+     * @return assoc array of fields  
      */ 
-    public static function schema($table, $filter="id") {
+    public static function fieldsKey($table, $filter="id") {
 
         $row = (array) self::findRow("select * from ".$table,"assoc");
         // remove array element base on filter if _none_ no filter
@@ -356,7 +370,19 @@ class PdoLite {
             // default is to filter id field
             unset($row[$filter]);
         }
+        // [0] => id [1] => name 
         return array_keys($row);
+    }
+
+    /* 
+     * flip fields key into array
+     * @param $table $filter
+     * @return assoc array of fields 
+     */ 
+    public static function schema($table, $filter="id") {
+    
+        // [0] => id [1] => name to [id] => 0 [name] => 1  
+        return array_flip(self::fieldsKey($table, $filter));
     }
 
     /* 
@@ -382,8 +408,9 @@ class PdoLite {
     public static function schemaBasedArray($tname, $iArray) {
 
         if (empty($tname) or empty($iArray)) return array();
-        $fields = self::schema($tname);
-        return self::aIntersec(array_merge($fields, $iArray), $fields);
+        $fields = self::fieldsKey($tname);
+        $carray = array_merge(array_flip($fields), $iArray);
+        return self::aIntersec($carray, $fields);
     }  
 
      /* 
@@ -391,7 +418,7 @@ class PdoLite {
      * @param $array  
      * @return string title, maker
      */ 
-    public static function a2SelStr($iArray) {
+    public static function a2sSelect($iArray) {
 
         return implode(", ", array_keys($iArray));
     }
@@ -401,7 +428,7 @@ class PdoLite {
      * @param $array  
      * @return string 
      */ 
-    public static function a2UptStr($iArray) {
+    public static function a2sUpdate($iArray) {
 
         $str = "";
         while (list($key, $val) = each($iArray)) {
@@ -420,11 +447,69 @@ class PdoLite {
      * @param $array  
      * @return string (title, maker) VALUES ("Title","Maker")
      */ 
-    public static function a2InsStr($iArray) {
+    public static function a2sInsert($iArray) {
 
-        $value = '"' . implode('", "', array_values($iArray)) . '"'; // must use this in case quote in the name
+        $value = "'" . implode("', '", array_values($iArray)) . "'"; // must use this in case quote in the name
         $name = implode(", ", array_keys($iArray));
         return "($name) VALUES ($value)";
-    }    
+    }   
 
+     /* 
+     * utilize debug default to br
+     * @param $ivar $istr $iformat  
+     * @return string 
+     */ 
+    public static function pln($iVar, $iStr = "", $iFormat = "br") {
+    
+        print self::debug($iVar, $iStr, $iFormat);
+    }
+
+     /* 
+     * alias to debug 
+     * @param $ivar $istr $iformat  
+     * @return string 
+     */ 
+    public static function prt($iVar, $iStr = "", $iFormat = "") {
+
+        print self::debug($iVar, $iStr, $iFormat);
+    }
+
+     /* 
+     * print debug message
+     * @param $ivar $istr $iformat  
+     * @return string 
+     */ 
+    public static function debug($iVar, $iStr = "", $iFormat = "") {
+        $preText = $dTrace = "";
+        if (!empty($iStr) and strtolower($iStr) == "dtrace") {
+            $dTrace = "dtrace";
+        }
+        if (!empty($iStr) and strtolower($iStr) <> "dtrace") {
+            $preText = "[-" . strtoupper($iStr) . "-] ";
+        }
+        $fstr = "$preText%s";
+        if (!empty($iVar)) {
+            if (is_array($iVar) or ( is_object($iVar))) {
+                $iVar = print_r($iVar, true);
+            }
+        } else {
+            $iVar = ' Var is empty!';
+        }
+        switch (strtolower($iFormat)) {
+            case "pre":
+                $fstr = "<pre>$preText%s</pre>";
+                break;
+            case "p":
+            case "br":
+                $fstr = "<$iFormat />$preText%s";
+                break;
+            default:
+                $fstr = " $fstr";
+        }
+        if (!empty($dTrace)) {
+            $dTrace = self::backTrace();
+        }
+        $ret = sprintf($fstr, $iVar) . $dTrace;
+        return $ret;
+    }
 } 
