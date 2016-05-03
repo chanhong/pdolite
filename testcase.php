@@ -5,7 +5,7 @@ use PdoLite\PdoLite;
 
 const DB_SQLITE = 'sqlite:db/mydb.sqlite';
 const DB_MYSQL = 'mysql:host=localhost;port=3306;;dbname=bookshelf';
-const DB_SQLSRV = 'sqlsrv:server=uwmca-db1;Database=bookshelf';
+const DB_SQLSRV = 'sqlsrv:server=(local);Database=bookshelf';
 
 $dsn = DB_SQLITE;
 
