@@ -7,7 +7,7 @@ const DB_SQLITE = 'sqlite:db/mydb.sqlite';
 const DB_MYSQL = 'mysql:host=localhost;port=3306;;dbname=bookshelf';
 const DB_SQLSRV = 'sqlsrv:server=uwmca-db1;Database=bookshelf';
 
-$dsn = DB_SQLSRV;
+$dsn = DB_SQLITE;
 
 $user = 'user';
 $passwd = 'user';
