@@ -22,7 +22,7 @@ $db->dbConnect(PdoLite::$cfg['dsn'], PdoLite::$cfg['dbuser'], PdoLite::$cfg['dbp
 // base test case
 echo "<p />rows2array-bef";
 // mysql and sqlite don't like ' so need to recode to work around this whereas sqlsrv like '
-$sql = 'insert into authors ' . PdoLite::a2sInsert(['name'=>'test','biography'=>'test insert']);
+$sql = 'insert into authors ' . PdoLite::a2sInsert(['name'=>"t'est",'biography'=>"t'est insert"]);
 PdoLite::pln($sql,"sql");
 $results = "";
 $results = PdoLite::exec($sql);

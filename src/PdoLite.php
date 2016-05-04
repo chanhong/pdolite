@@ -446,6 +446,17 @@ class PdoLite {
     }
 
      /* 
+     * escape quote before insert to database
+     * @param $array  
+     * @return string with escape quote
+     */ 
+    public static function escapeQuote($iArray) {
+        
+        (!empty($iArray)) ? $ret = str_replace("'", "''", str_replace("\'", "'", $iArray)) : $ret = "";
+        return $ret;
+    }
+    
+     /* 
      * array to sql insert statement
      * @param $array  
      * @return string (title, maker) VALUES ("Title","Maker")
@@ -453,7 +464,7 @@ class PdoLite {
     public static function a2sInsert($iArray) {
 
         // must use this in case quote in the name
-        $value = "'" . implode("', '", array_values($iArray)) . "'"; 
+        $value = "'" . implode("', '", array_values(self::escapeQuote($iArray))) . "'"; 
         $name = implode(", ", array_keys($iArray));
         return "($name) VALUES ($value)";
     }   
