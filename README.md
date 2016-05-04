@@ -3,18 +3,24 @@ PdoLite
 
 Very lite PDO database class
 
+Installation
+------------
+
+$ ./composer.phar require chanhong/pdolite ~1.0-dev
+
 Usage
 -----
 
 //Sample dsn
 
-$dsn = 'sqlite:/opt/databases/mydb.sq3';
-$dsn = 'mysql:host=localhost;port=3306;;dbname=testdb;user=bruce;password=mypass';
-$dsn = 'pgsql:host=localhost;port=5432;dbname=testdb;user=bruce;password=mypass';
-$dsn = 'sqlsrv:server=dbhost;Database=testdb';
-$dsn = 'odbc:Driver={SQL Server Native Client 10.0};Server=dbhost;Database=testdb';
+Please see settings-dist.php 
 
 // Sample code using New Ojbect call
+
+<?php
+include ('src\pdolite.php');
+
+use PdoLite\PdoLite;
 
 $db = new PdoLite();
 $conn = $db->dbConnect($dsn,$username,$password);
@@ -26,3 +32,11 @@ PdoLite::exec("update test set title='Test' where id =1h");
 foreach( PdoLite::query("SELECT * FROM test") as $row){ 
         print_r($row); 
 } 
+
+Please see testcase.php for more detail
+
+// PHPUnit Usage
+
+cd pdolite
+phpunit test\PdoLiteTest.php 
+

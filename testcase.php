@@ -3,31 +3,36 @@ include ('src\pdolite.php');
 
 use PdoLite\PdoLite;
 
-const DB_SQLITE = 'sqlite:db/mydb.sqlite';
-const DB_MYSQL = 'mysql:host=localhost;port=3306;;dbname=bookshelf';
-const DB_SQLSRV = 'sqlsrv:server=(local);Database=bookshelf';
+if (file_exists("settings.php")) {
+    include("settings.php");
+} else {
+    include("settings-dist.php");
+}
 
-$dsn = DB_SQLITE;
+PdoLite::$cfg = $cfg;
 
-$user = 'user';
-$passwd = 'user';
-
-defined('PDOLITE_DB_DSN') or define('PDOLITE_DB_DSN', $dsn);
-defined('PDOLITE_DB_USER') or define('PDOLITE_DB_USER', $user);
-defined('PDOLITE_DB_PASS') or define('PDOLITE_DB_PASS', $passwd);
+defined('PDOLITE_DB_DSN') or define('PDOLITE_DB_DSN', PdoLite::$cfg['dsn']);
+defined('PDOLITE_DB_USER') or define('PDOLITE_DB_USER', PdoLite::$cfg['dbuser']);
+defined('PDOLITE_DB_PASS') or define('PDOLITE_DB_PASS',PdoLite::$cfg['dbpass']);
 
 $db = new PdoLite();
-$db->dbConnect($dsn, $user, $passwd);
+$db->dbConnect(PdoLite::$cfg['dsn'], PdoLite::$cfg['dbuser'], PdoLite::$cfg['dbpass']);
 
 //echo "<pre>";
 // base test case
 echo "<p />rows2array-bef";
+// mysql and sqlite don't like ' so need to recode to work around this whereas sqlsrv like '
 $sql = 'insert into authors ' . PdoLite::a2sInsert(['name'=>'test','biography'=>'test insert']);
+PdoLite::pln($sql,"sql");
+$results = "";
 $results = PdoLite::exec($sql);
 $lastid=$db->getLastId("authors","id");
 PdoLite::pln($results,"last id: $lastid status");
-PdoLite::pln(PdoLite::row2Array("select * from authors where id=$lastid", "assoc"),"added to assoc"); 
-$results = PdoLite::exec("delete authors where id=".$lastid);
+PdoLite::pln(PdoLite::row2Array("select * from authors where id=$lastid", "assoc"),"added to assoc");
+ 
+$sql = "delete from authors where id=".$lastid;
+PdoLite::pln($sql,"sql");
+$results = PdoLite::exec($sql);
 PdoLite::pln($results,"delete lastid: $lastid status ");
 
 $fArray = PdoLite::schema("authors", "_none_");

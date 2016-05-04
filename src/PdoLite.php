@@ -27,7 +27,10 @@ namespace PdoLite;
 
 use PDO;
 
+
 class PdoLite {
+
+    public static $cfg;
      
     public static $options;
     
@@ -449,7 +452,8 @@ class PdoLite {
      */ 
     public static function a2sInsert($iArray) {
 
-        $value = "'" . implode("', '", array_values($iArray)) . "'"; // must use this in case quote in the name
+        // must use this in case quote in the name
+        $value = "'" . implode("', '", array_values($iArray)) . "'"; 
         $name = implode(", ", array_keys($iArray));
         return "($name) VALUES ($value)";
     }   
