@@ -439,7 +439,9 @@ class PdoLite {
                 $val = "0"; 
             }
             // concat fields list for sql update
-            $str .= $key . ' ="' . $val . '", ';
+//            $str .= $key . ' ="' . $val . '", ';
+            // use single quote to work around sqlsrv error
+            $str .= $key . " ='" . self::escapeQuote($val) . "', ";
         }
         // return maker= 'Name', acct= '15',
         return substr($str, 0, strlen($str) - 2); // take out comma and space

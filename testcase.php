@@ -42,7 +42,7 @@ PdoLite::pln($sql,"sql");
 PdoLite::pln(PdoLite::rows2array($sql, "assoc"),"assoc-aft");
 
 PdoLite::pln($db->getNextId("books","id"),"next book id");
-$sql = "update books set title='Gregor the Overlander' where id =1"; 
+$sql = "update authors set biography='Suzanne Marie Collins is an American television writer and novelist, best known as the author of The Underland Chronicles and The Hunger Games trilogy' where id =1"; 
 PdoLite::pln($sql,"sql");
 $results = PdoLite::exec($sql);
 PdoLite::pln($results,"update");
