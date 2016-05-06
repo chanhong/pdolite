@@ -541,18 +541,18 @@ class PdoLite {
      * @param table, $iFldList, $where  
      * @return string
      */ 
-    public static function qbSelect($tname, $iFldList, $iWhere="") {
+    public static function qbSelect($tname, $iFldList="", $iWhere="") {
 
-        if (empty($tname) or empty($iFldList)) return;
+        if (empty($tname)) return;
         (!empty($iWhere))
-        ? $where = " WHERE " . $iWhere
-        : $where = "";
-        $return = "SELECT " . $iFldList
+            ? $where = " WHERE " . $iWhere
+            : $where = "";
+        if (empty($iFldList)) $iFldList = "*";
+        
+        return "SELECT " . $iFldList
             . " FROM ". $tname 
             . $where . ";"
         ;
-        self::pln($return);
-        return $return;
     }
 
      /* 

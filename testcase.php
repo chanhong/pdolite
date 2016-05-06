@@ -20,6 +20,9 @@ $db->dbConnect(PdoLite::$cfg['dsn'], PdoLite::$cfg['dbuser'], PdoLite::$cfg['dbp
 
 // base test case
 echo "<p />rows2array-bef";
+$sql = PdoLite::qbSelect("authors");
+PdoLite::pln($sql,"sql");
+PdoLite::pln(PdoLite::rows2Array($sql, "assoc"),"all");
 $fldList = PdoLite::a2sInsert(['name'=>"t'est",'biography'=>"t'est insert"]);
 $sql = PdoLite::qbInsert("authors", $fldList);
 PdoLite::pln($sql,"sql");
@@ -28,7 +31,7 @@ $results = "";
 $results = PdoLite::exec($sql);
 $lastid=$db->getLastId("authors","id");
 PdoLite::pln($results,"last id: $lastid status");
-$sql = PdoLite::qbSelect("authors", "*", "id=$lastid");
+$sql = PdoLite::qbSelect("authors", "", "id=$lastid");
 PdoLite::pln($sql,"sql");
 PdoLite::pln(PdoLite::row2Array($sql, "assoc"),"added to assoc");
 
