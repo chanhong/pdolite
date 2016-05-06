@@ -21,31 +21,31 @@ $db->dbConnect(PdoLite::$cfg['dsn'], PdoLite::$cfg['dbuser'], PdoLite::$cfg['dbp
 // base test case
 echo "<p />rows2array-bef";
 $fldList = PdoLite::a2sInsert(['name'=>"t'est",'biography'=>"t'est insert"]);
-$sql = PdoLite::insert("authors", $fldList);
+$sql = PdoLite::qbInsert("authors", $fldList);
 PdoLite::pln($sql,"sql");
 $results = "";
 
 $results = PdoLite::exec($sql);
 $lastid=$db->getLastId("authors","id");
 PdoLite::pln($results,"last id: $lastid status");
-$sql = PdoLite::select("authors", "*", "id=$lastid");
+$sql = PdoLite::qbSelect("authors", "*", "id=$lastid");
 PdoLite::pln($sql,"sql");
 PdoLite::pln(PdoLite::row2Array($sql, "assoc"),"added to assoc");
 
-$sql = PdoLite::delete("authors", "id=$lastid");
+$sql = PdoLite::qbDelete("authors", "id=$lastid");
 PdoLite::pln($sql,"sql");
 $results = PdoLite::exec($sql);
 PdoLite::pln($results,"delete lastid: $lastid status ");
 
 $fArray = PdoLite::schema("authors", "_none_");
 PdoLite::pln($fArray,"authors");
-$sql = PdoLite::select("authors", PdoLite::a2sSelect($fArray));
+$sql = PdoLite::qbSelect("authors", PdoLite::a2sSelect($fArray));
 PdoLite::pln($sql,"sql");
 PdoLite::pln(PdoLite::rows2array($sql, "assoc"),"assoc-aft");
 
 PdoLite::pln($db->getNextId("books","id"),"next book id");
 $sqlUpdList = "biography='Suzanne Marie Collins is an American television writer and novelist, best known as the author of The Underland Chronicles and The Hunger Games trilogy'"; 
-$sql = PdoLite::update("authors", $sqlUpdList, "id=1");
+$sql = PdoLite::qbUpdate("authors", $sqlUpdList, "id=1");
 PdoLite::pln($sql,"sql");
 $results = PdoLite::exec($sql);
 PdoLite::pln($results,"updated");
@@ -63,7 +63,7 @@ PdoLite::pln(PdoLite::a2sUpdate($one),"update");
 PdoLite::pln(PdoLite::a2sSelect($iArray),"select");
 
 // old test case
-$sql = PdoLite::select("books", "*", "id <3");
+$sql = PdoLite::qbSelect("books", "*", "id <3");
 PdoLite::pln($sql,"sql");
 echo "<p />_call dbFetch";
 PdoLite::pln(PdoLite::row2Array($sql),"row2array"); 
@@ -74,7 +74,7 @@ $arr = PdoLite::dbFetchArray(PdoLite::query($sql));
 PdoLite::pln($arr,"both"); 
 PdoLite::pln(array_values($arr),"value"); 
 
-$sql = PdoLite::select("books", "*", "id <3");
+$sql = PdoLite::qbSelect("books", "*", "id <3");
 echo "<p />rows2arrayAll: ";
 PdoLite::pln($db->rows2arrayAll($sql, "assoc"),"assoc"); 
 echo "<br />rows2array: ";

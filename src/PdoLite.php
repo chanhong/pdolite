@@ -541,7 +541,7 @@ class PdoLite {
      * @param table, $iFldList, $where  
      * @return string
      */ 
-    public static function select($tname, $iFldList, $iWhere="") {
+    public static function qbSelect($tname, $iFldList, $iWhere="") {
 
         if (empty($tname) or empty($iFldList)) return;
         (!empty($iWhere))
@@ -560,7 +560,7 @@ class PdoLite {
      * @param table, $iFldList, $where  
      * @return string
      */ 
-    public static function update($tname, $iFldList, $iWhere="") {
+    public static function qbUpdate($tname, $iFldList, $iWhere="") {
         
         if (empty($tname) or empty($iFldList)) return;
         (!empty($iWhere))
@@ -577,7 +577,7 @@ class PdoLite {
      * @param table, $where  
      * @return string
      */ 
-    public static function delete($tname, $iWhere) {
+    public static function qbDelete($tname, $iWhere) {
         
         if (empty($tname) or empty($iWhere)) return;
         return "DELETE FROM $tname WHERE " . $iWhere . ";"
@@ -589,7 +589,7 @@ class PdoLite {
      * @param table, $iFldList 
      * @return string
      */ 
-    public static function insert($tname, $iFldList) {
+    public static function qbInsert($tname, $iFldList) {
         
         if (empty($tname) or empty($iFldList)) return;
         return "INSERT INTO $tname " . $iFldList . ";"
