@@ -360,6 +360,7 @@ class PdoLite {
         return self::dbQ2Array($sql, $atype, "all");
     }
 
+    // database schema related method
     /* 
      * get one row from table
      * @param $table $filter
@@ -415,7 +416,22 @@ class PdoLite {
         $carray = array_merge(array_flip($fields), $iArray);
         return self::aIntersec($carray, $fields);
     }  
-
+    
+     /* 
+     * escape quote before insert to database
+     * @param $array  
+     * @return string with escape quote
+     */ 
+    public static function escapeQuote($iArray) {
+        
+        // clean \' into single quote before double it
+        (!empty($iArray)) 
+        ? $ret = str_replace("'", "''", str_replace("\'", "'", $iArray)) 
+        : $ret = "";
+        return $ret;
+    }
+    
+    // array to query string with escape single quote
      /* 
      * array to fields list for sql select
      * @param $array  
@@ -439,7 +455,6 @@ class PdoLite {
                 $val = "0"; 
             }
             // concat fields list for sql update
-//            $str .= $key . ' ="' . $val . '", ';
             // use single quote to work around sqlsrv error
             $str .= $key . " ='" . self::escapeQuote($val) . "', ";
         }
@@ -447,17 +462,6 @@ class PdoLite {
         return substr($str, 0, strlen($str) - 2); // take out comma and space
     }
 
-     /* 
-     * escape quote before insert to database
-     * @param $array  
-     * @return string with escape quote
-     */ 
-    public static function escapeQuote($iArray) {
-        
-        (!empty($iArray)) ? $ret = str_replace("'", "''", str_replace("\'", "'", $iArray)) : $ret = "";
-        return $ret;
-    }
-    
      /* 
      * array to sql insert statement
      * @param $array  
@@ -471,6 +475,7 @@ class PdoLite {
         return "($name) VALUES ($value)";
     }   
 
+    // debug related code
      /* 
      * utilize debug default to br
      * @param $ivar $istr $iformat  
@@ -529,4 +534,66 @@ class PdoLite {
         $ret = sprintf($fstr, $iVar) . $dTrace;
         return $ret;
     }
+
+    // Query builder lite
+     /* 
+     * build select statement (fieldlist must be already single quote safe)
+     * @param table, $iFldList, $where  
+     * @return string
+     */ 
+    public static function select($tname, $iFldList, $iWhere="") {
+
+        if (empty($tname) or empty($iFldList)) return;
+        (!empty($iWhere))
+        ? $where = " WHERE " . $iWhere
+        : $where = "";
+        $return = "SELECT " . $iFldList
+            . " FROM ". $tname 
+            . $where . ";"
+        ;
+        self::pln($return);
+        return $return;
+    }
+
+     /* 
+     * build update statement (fieldlist must be already single quote safe)
+     * @param table, $iFldList, $where  
+     * @return string
+     */ 
+    public static function update($tname, $iFldList, $iWhere="") {
+        
+        if (empty($tname) or empty($iFldList)) return;
+        (!empty($iWhere))
+        ? $where = " WHERE " . $iWhere
+        : $where = "";
+        return "UPDATE $tname"
+            . " SET " . $iFldList
+            . $where . ";"
+        ;
+    }
+
+     /* 
+     * build delete statement
+     * @param table, $where  
+     * @return string
+     */ 
+    public static function delete($tname, $iWhere) {
+        
+        if (empty($tname) or empty($iWhere)) return;
+        return "DELETE FROM $tname WHERE " . $iWhere . ";"
+        ;
+    }
+    
+     /* 
+     * build insert statement (fieldlist must be already single quote safe)
+     * @param table, $iFldList 
+     * @return string
+     */ 
+    public static function insert($tname, $iFldList) {
+        
+        if (empty($tname) or empty($iFldList)) return;
+        return "INSERT INTO $tname " . $iFldList . ";"
+        ;
+    }
+
 } 

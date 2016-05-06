@@ -18,34 +18,37 @@ defined('PDOLITE_DB_PASS') or define('PDOLITE_DB_PASS',PdoLite::$cfg['dbpass']);
 $db = new PdoLite();
 $db->dbConnect(PdoLite::$cfg['dsn'], PdoLite::$cfg['dbuser'], PdoLite::$cfg['dbpass']);
 
-//echo "<pre>";
 // base test case
 echo "<p />rows2array-bef";
-// mysql and sqlite don't like ' so need to recode to work around this whereas sqlsrv like '
-$sql = 'insert into authors ' . PdoLite::a2sInsert(['name'=>"t'est",'biography'=>"t'est insert"]);
+$fldList = PdoLite::a2sInsert(['name'=>"t'est",'biography'=>"t'est insert"]);
+$sql = PdoLite::insert("authors", $fldList);
 PdoLite::pln($sql,"sql");
 $results = "";
+
 $results = PdoLite::exec($sql);
 $lastid=$db->getLastId("authors","id");
 PdoLite::pln($results,"last id: $lastid status");
-PdoLite::pln(PdoLite::row2Array("select * from authors where id=$lastid", "assoc"),"added to assoc");
- 
-$sql = "delete from authors where id=".$lastid;
+$sql = PdoLite::select("authors", "*", "id=$lastid");
+PdoLite::pln($sql,"sql");
+PdoLite::pln(PdoLite::row2Array($sql, "assoc"),"added to assoc");
+
+$sql = PdoLite::delete("authors", "id=$lastid");
 PdoLite::pln($sql,"sql");
 $results = PdoLite::exec($sql);
 PdoLite::pln($results,"delete lastid: $lastid status ");
 
 $fArray = PdoLite::schema("authors", "_none_");
 PdoLite::pln($fArray,"authors");
-$sql = "select ".PdoLite::a2sSelect($fArray)." from authors";
+$sql = PdoLite::select("authors", PdoLite::a2sSelect($fArray));
 PdoLite::pln($sql,"sql");
 PdoLite::pln(PdoLite::rows2array($sql, "assoc"),"assoc-aft");
 
 PdoLite::pln($db->getNextId("books","id"),"next book id");
-$sql = "update authors set biography='Suzanne Marie Collins is an American television writer and novelist, best known as the author of The Underland Chronicles and The Hunger Games trilogy' where id =1"; 
+$sqlUpdList = "biography='Suzanne Marie Collins is an American television writer and novelist, best known as the author of The Underland Chronicles and The Hunger Games trilogy'"; 
+$sql = PdoLite::update("authors", $sqlUpdList, "id=1");
 PdoLite::pln($sql,"sql");
 $results = PdoLite::exec($sql);
-PdoLite::pln($results,"update");
+PdoLite::pln($results,"updated");
 
 // current test case
 $iArray =[ 'x'=>null, 'name' => 'some name', 'biography' => 'some bio'
@@ -60,7 +63,8 @@ PdoLite::pln(PdoLite::a2sUpdate($one),"update");
 PdoLite::pln(PdoLite::a2sSelect($iArray),"select");
 
 // old test case
-$sql = "SELECT * FROM books where id <3"; 
+$sql = PdoLite::select("books", "*", "id <3");
+PdoLite::pln($sql,"sql");
 echo "<p />_call dbFetch";
 PdoLite::pln(PdoLite::row2Array($sql),"row2array"); 
 PdoLite::pln($db->dbFetchAssoc($db->query($sql)),"dbFetchAssoc"); 
@@ -70,7 +74,7 @@ $arr = PdoLite::dbFetchArray(PdoLite::query($sql));
 PdoLite::pln($arr,"both"); 
 PdoLite::pln(array_values($arr),"value"); 
 
-$sql = "SELECT * FROM books where id < 3"; 
+$sql = PdoLite::select("books", "*", "id <3");
 echo "<p />rows2arrayAll: ";
 PdoLite::pln($db->rows2arrayAll($sql, "assoc"),"assoc"); 
 echo "<br />rows2array: ";
@@ -97,7 +101,3 @@ foreach (PdoLite::query($sql) as $row) {
 $sql = "SELECT * FROM books where id =1"; 
 PdoLite::pln(PdoLite::findRow($sql, "lazy"),"findRow lazy"); 
 PdoLite::pln(PdoLite::findRow($sql, "obj"),"findRow obj"); 
-
-
-
-//echo "</pre>";
