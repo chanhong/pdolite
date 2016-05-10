@@ -207,7 +207,7 @@ class PdoLite {
      * @param $qhandle, $atype (both, assoc or array, num or blank)
      * @return $array of FETCH_BOTH 
      */ 
-    public static function dbFetch($qhandle, $atype = "both") {
+    public static function dbFetch($qhandle, $atype = "assoc") {
 
         try {
             if (is_object($qhandle)) {
@@ -697,6 +697,9 @@ class PdoLite {
 
         try {      
             $otype = self::getKeyVal($options, 'type');
+            if (empty($otype)) {
+                $otype = "assoc";
+            }            
             $all = self::getKeyVal($options, 'all');
             $sql = self::qbSelect($tname, $options);
             if (strtolower($all)=="all") {
