@@ -275,7 +275,7 @@ class PdoLite {
      * @param $sql $atype 
      * @return nested array of rows 
      */ 
-    public static function dbQ2Array($sql, $atype = "both", $fetch = "fetch") {
+    public static function dbQ2Array($sql, $atype = "assoc", $fetch = "fetch") {
 
         try {
             $myrows = array();
@@ -302,7 +302,7 @@ class PdoLite {
      * @param $sql  
      * @return nested array of rows 
      */ 
-    public static function dbQ2ArrayAll($sql, $atype = "both") {
+    public static function dbQ2ArrayAll($sql, $atype = "assoc") {
 
         try {
             $res = self::query($sql);
