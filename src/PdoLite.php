@@ -219,6 +219,7 @@ class PdoLite {
 		}
     }
 
+    // alias method
     /* 
      * alias to dbFetch obj 
      * @param $qhandle 
@@ -374,18 +375,16 @@ class PdoLite {
             // default is to filter id field
             unset($row[$filter]);
         }
-        // [0] => id [1] => name 
         return array_keys($row);
     }
 
     /* 
      * flip fields key into array
      * @param $table $filter
-     * @return assoc array of fields 
+     * @return assoc array of fields Array ( [name] => 0 [biography] => 1 ) 
      */ 
     public static function schema($table, $filter="id") {
     
-        // [0] => id [1] => name to [id] => 0 [name] => 1  
         return array_flip(self::fieldsKey($table, $filter));
     }
 
@@ -397,14 +396,14 @@ class PdoLite {
     public static function aIntersec($iArray, $allowArray = array()) {
         
         $return = $iArray; 
-        // do not filter the array
+        // if empty do not filter the array
         if (!empty($allowArray)) {
-                $return = array_intersect_key($iArray, array_flip($allowArray)); 
+            $return = array_intersect_key($iArray, array_flip($allowArray)); 
         }   
         return $return; 
     }
 
-     /* 
+     /* filterBySchema might be better, to decide delete this later (TODO)
      * merge and intersec array with schema
      * @param table, $array  
      * @return array of assoc
@@ -412,10 +411,42 @@ class PdoLite {
     public static function schemaBasedArray($tname, $iArray) {
 
         if (empty($tname) or empty($iArray)) return array();
+        
         $fields = self::fieldsKey($tname);
         $carray = array_merge(array_flip($fields), $iArray);
         return self::aIntersec($carray, $fields);
     }  
+    
+     /* 
+     * filter out fields not match schema fields
+     * @param table, $fldArray  
+     * @return filtered field Array ( [name] => some name [biography] => some bio ) 
+     */ 
+    public static function filterBySchema($tname, $iArray) {
+    
+        $fields = self::schema($tname,"_none_");
+        // diff in array with schma fields
+        $diffs = array_diff_key($iArray, $fields);
+        // remove unwanted fields
+        foreach ($diffs as $k=>$v) {
+            unset($iArray[$k]);
+        }
+        return $iArray;                
+    }
+
+     /* 
+     * get value from array
+     * @param array  
+     * @return string
+     */ 
+    public static function getKeyVal($iValue, $key) {
+
+        $return = "";
+        if (!empty($iValue[$key])) {
+            $return = $iValue[$key];
+        }
+        return $return;
+    }
     
      /* 
      * escape quote before insert to database
@@ -431,6 +462,68 @@ class PdoLite {
         return $ret;
     }
     
+
+    // debug related code
+     /* 
+     * utilize debug default to br
+     * @param $ivar $istr $iformat  
+     * @return string 
+     */ 
+    public static function pln($iVar, $iStr = "", $iFormat = "br") {
+    
+        print self::debug($iVar, $iStr, $iFormat);
+    }
+
+     /* 
+     * alias to debug 
+     * @param $ivar $istr $iformat  
+     * @return string 
+     */ 
+    public static function prt($iVar, $iStr = "", $iFormat = "") {
+
+        print self::debug($iVar, $iStr, $iFormat);
+    }
+
+     /* 
+     * print debug message
+     * @param $ivar $istr $iformat  
+     * @return string 
+     */ 
+    public static function debug($iVar, $iStr = "", $iFormat = "") {
+        
+        $preText = $dTrace = "";
+        if (!empty($iStr) and strtolower($iStr) == "dtrace") {
+            $dTrace = "dtrace";
+        }
+        if (!empty($iStr) and strtolower($iStr) <> "dtrace") {
+            $preText = "[-" . strtoupper($iStr) . "-] ";
+        }
+        $fstr = "$preText%s";
+        if (!empty($iVar)) {
+            if (is_array($iVar) or ( is_object($iVar))) {
+                $iVar = print_r($iVar, true);
+            }
+        } else {
+            $iVar = ' Var is empty!';
+        }
+        switch (strtolower($iFormat)) {
+            case "pre":
+                $fstr = "<pre>$preText%s</pre>";
+                break;
+            case "p":
+            case "br":
+                $fstr = "<$iFormat />$preText%s";
+                break;
+            default:
+                $fstr = " $fstr";
+        }
+        if (!empty($dTrace)) {
+            $dTrace = self::backTrace();
+        }
+        $ret = sprintf($fstr, $iVar) . $dTrace;
+        return $ret;
+    }
+
     // array to query string with escape single quote
      /* 
      * array to fields list for sql select
@@ -475,79 +568,26 @@ class PdoLite {
         return "($name) VALUES ($value)";
     }   
 
-    // debug related code
-     /* 
-     * utilize debug default to br
-     * @param $ivar $istr $iformat  
-     * @return string 
-     */ 
-    public static function pln($iVar, $iStr = "", $iFormat = "br") {
-    
-        print self::debug($iVar, $iStr, $iFormat);
-    }
-
-     /* 
-     * alias to debug 
-     * @param $ivar $istr $iformat  
-     * @return string 
-     */ 
-    public static function prt($iVar, $iStr = "", $iFormat = "") {
-
-        print self::debug($iVar, $iStr, $iFormat);
-    }
-
-     /* 
-     * print debug message
-     * @param $ivar $istr $iformat  
-     * @return string 
-     */ 
-    public static function debug($iVar, $iStr = "", $iFormat = "") {
-        $preText = $dTrace = "";
-        if (!empty($iStr) and strtolower($iStr) == "dtrace") {
-            $dTrace = "dtrace";
-        }
-        if (!empty($iStr) and strtolower($iStr) <> "dtrace") {
-            $preText = "[-" . strtoupper($iStr) . "-] ";
-        }
-        $fstr = "$preText%s";
-        if (!empty($iVar)) {
-            if (is_array($iVar) or ( is_object($iVar))) {
-                $iVar = print_r($iVar, true);
-            }
-        } else {
-            $iVar = ' Var is empty!';
-        }
-        switch (strtolower($iFormat)) {
-            case "pre":
-                $fstr = "<pre>$preText%s</pre>";
-                break;
-            case "p":
-            case "br":
-                $fstr = "<$iFormat />$preText%s";
-                break;
-            default:
-                $fstr = " $fstr";
-        }
-        if (!empty($dTrace)) {
-            $dTrace = self::backTrace();
-        }
-        $ret = sprintf($fstr, $iVar) . $dTrace;
-        return $ret;
-    }
-
-    // Query builder lite
+    // SIDU Query builder lite
      /* 
      * build select statement (fieldlist must be already single quote safe)
      * @param table, $iFldList, $where  
      * @return string
      */ 
-    public static function qbSelect($tname, $iFldList="", $iWhere="") {
+    public static function qbSelect($tname, $options=array()) {
 
         if (empty($tname)) return;
-        (!empty($iWhere))
-            ? $where = " WHERE " . $iWhere
+        
+        $one = self::getSUDIOptions("select", $tname, $options);        
+        
+        (!empty($one['where']))
+            ? $where = " WHERE " . $one['where']
             : $where = "";
-        if (empty($iFldList)) $iFldList = "*";
+            
+        (empty($one['fl'])) 
+        ? $iFldList = "*"
+        : $iFldList = $one['fl']
+        ;
         
         return "SELECT " . $iFldList
             . " FROM ". $tname 
@@ -556,19 +596,15 @@ class PdoLite {
     }
 
      /* 
-     * build update statement (fieldlist must be already single quote safe)
-     * @param table, $iFldList, $where  
+     * build insert statement (fieldlist must be already single quote safe)
+     * @param table, $iFldList 
      * @return string
      */ 
-    public static function qbUpdate($tname, $iFldList, $iWhere="") {
+    public static function qbInsert($tname, $options) {
         
-        if (empty($tname) or empty($iFldList)) return;
-        (!empty($iWhere))
-        ? $where = " WHERE " . $iWhere
-        : $where = "";
-        return "UPDATE $tname"
-            . " SET " . $iFldList
-            . $where . ";"
+        if (empty($tname) or empty($options['fl'])) return;
+        $one = self::getSUDIOptions("insert", $tname, $options);        
+        return "INSERT INTO $tname " . $one['fl'] . ";"
         ;
     }
 
@@ -577,23 +613,143 @@ class PdoLite {
      * @param table, $where  
      * @return string
      */ 
-    public static function qbDelete($tname, $iWhere) {
+    public static function qbDelete($tname, $options) {
         
-        if (empty($tname) or empty($iWhere)) return;
-        return "DELETE FROM $tname WHERE " . $iWhere . ";"
+        if (empty($tname) or empty($options['where'])) return;
+        return "DELETE FROM $tname WHERE " . $options['where'] . ";"
         ;
     }
     
      /* 
-     * build insert statement (fieldlist must be already single quote safe)
-     * @param table, $iFldList 
+     * build update statement (fieldlist must be already single quote safe)
+     * @param table, $iFldList, $where  
      * @return string
      */ 
-    public static function qbInsert($tname, $iFldList) {
+    public static function qbUpdate($tname, $options) {
         
-        if (empty($tname) or empty($iFldList)) return;
-        return "INSERT INTO $tname " . $iFldList . ";"
+        if (empty($tname) or empty($options['fl'])) return;
+        
+        $one = self::getSUDIOptions("update", $tname, $options);        
+
+        (!empty($one['where']))
+            ? $where = " WHERE " . $one['where']
+            : $where = "";
+            
+        return "UPDATE $tname"
+            . " SET " . $one['fl']
+            . $where . ";"
         ;
+    }
+    
+    // SIDU lite
+     /* 
+     * get SUDI options
+     * @param table, $iFldList, $where  
+     * @return string
+     */ 
+    public static function getSUDIOptions($opr, $tname, $options=array()) {
+    
+        try {
+            $fldList = "";
+            
+            $iFldList = self::getKeyVal($options, 'fl');
+            $where = self::getKeyVal($options, 'where');
+            $otype = self::getKeyVal($options, 'type');
+            
+            switch (strtolower($opr)) {
+                case "update":
+                    if (!empty($iFldList) and is_array($iFldList)) {
+                        $fldList = self::a2sUpdate(self::filterBySchema($tname, $iFldList));
+                    }
+                    break;
+                case "insert":
+                    if (!empty($iFldList) and is_string($iFldList)) {
+                        // fields list then flip the array to key
+                        $iFldList = array_flip(explode(",", str_replace(' ','',$iFldList)));
+                    } 
+                    if (!empty($iFldList) and is_array($iFldList)) {
+                        $fldList = self::a2sInsert(self::filterBySchema($tname, $iFldList));
+                    }
+                    break;
+                case "select":
+                defailt :
+                    if (!empty($iFldList) and is_string($iFldList)) {
+                        // fields list then flip the array to key
+                        $iFldList = array_flip(explode(",", str_replace(' ','',$iFldList)));
+                    } 
+                    
+                    if (!empty($iFldList) and is_array($iFldList)) {
+                        $fldList = self::a2sSelect(self::filterBySchema($tname, $iFldList));
+                    }
+            }
+            return ['fl'=>$fldList, 'where'=>$where, 'type'=>$otype];
+		} catch (PDOException $e) {
+            die(self::dbError($tname));
+		}
+    }
+
+     /* 
+     * select record set
+     * @param table, $options  
+     * @return record set of array ['type']
+     */ 
+    public static function select($tname, $options=array()) {
+
+        try {      
+            $otype = self::getKeyVal($options, 'type');
+            $all = self::getKeyVal($options, 'all');
+            $sql = self::qbSelect($tname, $options);
+            if (strtolower($all)=="all") {
+                $return = self::rows2arrayAll($sql, $otype); 
+            } else {
+                $return = self::rows2Array($sql, $otype);
+            }
+            return  $return; 
+		} catch (PDOException $e) {
+            die(self::dbError($tname));
+		}
+    }
+
+     /* 
+     * insert record 
+     * @param table, $options  
+     * @return status
+     */ 
+    public static function insert($tname, $options=array()) {
+
+        try {        
+            return PdoLite::exec(self::qbInsert($tname, $options));
+		} catch (PDOException $e) {
+            die(self::dbError($tname));
+		}
+    }
+
+     /* 
+     * delete record 
+     * @param table, $options  
+     * @return status
+     */ 
+    public static function delete($tname, $options=array()) {
+        
+        try {        
+            return PdoLite::exec(self::qbDelete($tname, $options));
+		} catch (PDOException $e) {
+            die(self::dbError($tname));
+		}
+    }
+
+     /* 
+     * update record 
+     * @param table, $options  
+     * @return status
+     */ 
+    public static function update($tname, $options=array()) {
+        
+        try {        
+            return PdoLite::exec(self::qbUpdate($tname, $options));
+		} catch (PDOException $e) {
+            die(self::dbError($tname));
+		}
     }
 
 } 

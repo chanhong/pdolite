@@ -1,12 +1,16 @@
 PdoLite
 ================
 
-Very lite PDO database class with lite query builder
+Very lite PDO database class with lite query builder and SIDU (Select, Insert, Delete, Update).  
+
+One class file with the size of 22 KB.
+
+You can also use all the native PDO methods: http://php.net/manual/en/book.pdo.php
 
 Installation
 ------------
 
-$ ./composer.phar require chanhong/pdolite ~1.0-dev
+$ ./composer.phar require chanhong/pdolite 1.0.x-dev
 
 Usage
 -----
@@ -31,12 +35,10 @@ print_r($conn->dbFetchAssoc($sql));
 
 // Sample code using static call
 
-PdoLite::exec("update test set title='Test' where id =1h"); 
+PdoLite::pln(PdoLite::select("authors", ['type'=>'assoc']),"select");
 
-foreach( PdoLite::query("SELECT * FROM test") as $row){ 
-        
-        print_r($row); 
-} 
+$sqlUpdList = ['biography'=>'test'];
+PdoLite::pln(PdoLite::update("authors", ['fl'=>$sqlUpdList, 'where'=>'id=1']),"update");
 
 Please see testcase.php for more detail
 
