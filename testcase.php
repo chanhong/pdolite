@@ -39,7 +39,7 @@ PdoLite::pln(PdoLite::select("authors", ['fl'=>'name','type'=>'both','where'=>'i
 PdoLite::pln(PdoLite::select("authors", ['fl'=>'id, name,xid','where'=>'id=1']),"name,xid");
 PdoLite::pln(PdoLite::select("authors", ['fl'=>$iArray,'type'=>'num','where'=>'id=1']),"num");
 PdoLite::pln(PdoLite::select("books", ['where'=>'id<3']),"assoc");
-PdoLite::pln(PdoLite::select("books", ['where'=>'id<3','all'=>'all']),"all");
+PdoLite::pln(PdoLite::select("books", ['where'=>'id<3','all'=>'all']),"all-assoc");
 
 // schema test case
 $fields = PdoLite::fieldsKey("authors","_none");
