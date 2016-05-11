@@ -18,6 +18,8 @@ Usage
 Use Case: Use with Slim 3 modify 3 files: settings.php, dependencies.php and index.php
 --------
 
+You can download the sample application of Slim 3 using PdoLite here: https://github.com/chanhong/slimbookshelf4iis
+
 In settings.php
 
         'pdolite' => [
