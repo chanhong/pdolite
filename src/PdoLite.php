@@ -346,7 +346,7 @@ class PdoLite {
      * @param $sql $type 
      * @return nested array of rows 
      */ 
-    public static function rows2Array($sql, $atype = "") {
+    public static function rows2Array($sql, $atype = "assoc") {
         
         return self::dbQ2Array($sql, $atype, "fetch");
     }
@@ -356,7 +356,7 @@ class PdoLite {
      * @param $sql $type 
      * @return nested array of rows 
      */ 
-    public static function rows2ArrayAll($sql, $atype = "") {
+    public static function rows2ArrayAll($sql, $atype = "assoc") {
 
         return self::dbQ2Array($sql, $atype, "all");
     }
@@ -439,13 +439,16 @@ class PdoLite {
      * @param array  
      * @return string
      */ 
-    public static function getKeyVal($iValue, $key) {
+    public static function getKeyVal($iValue, $key, $default="") {
 
-        $return = "";
         if (!empty($iValue[$key])) {
-            $return = $iValue[$key];
+            return $iValue[$key];
+        } elseif (!empty($default)) {
+            return $default;
         }
-        return $return;
+        else {
+            return;
+        }
     }
     
      /* 
@@ -696,10 +699,7 @@ class PdoLite {
     public static function select($tname, $options=array()) {
 
         try {      
-            $otype = self::getKeyVal($options, 'type');
-            if (empty($otype)) {
-                $otype = "assoc";
-            }            
+            $otype = self::getKeyVal($options, 'type', 'assoc');
             $all = self::getKeyVal($options, 'all');
             $sql = self::qbSelect($tname, $options);
             if (strtolower($all)=="all") {
