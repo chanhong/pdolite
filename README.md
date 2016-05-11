@@ -15,6 +15,41 @@ $ ./composer.phar require chanhong/pdolite 1.0.x-dev
 Usage
 -----
 
+Use Case: Use with Slim 3 modify 3 files: settings.php, dependencies.php and index.php
+--------
+
+In settings.php
+
+        'pdolite' => [
+            'dsn' => 'mysql:host=localhost;dbname=bookshelf;charset=utf8',
+            'username' => 'user',
+            'password' => 'password',
+        ], 
+
+In dependencies.php
+        
+use PdoLite\PdoLite;
+// Database
+$container['pdolite'] = function ($c) {
+    PdoLite::$cfg = $settings = $c->get('settings')['pdolite'];    
+    $conn = PdoLite::dbConnect($settings['dsn'],$settings['username'],$settings['password']);
+    return $conn;        
+};        
+
+In your index.php
+
+// Register the database connection with PdoLite
+$pdolite = $app->getContainer()->get('pdolite');
+
+
+In any of your php file that you want to use PdoLite 
+
+        return PdoLite::select("authors");
+        
+
+Use Case: Use with your own code: 
+--------
+        
 //Sample dsn
 
 Please see settings-dist.php 
@@ -42,7 +77,8 @@ PdoLite::pln(PdoLite::update("authors", ['fl'=>$sqlUpdList, 'where'=>'id=1']),"u
 
 Please see testcase.php for more detail
 
-// PHPUnit Usage
+PHPUnit Usage
+-------------
 
 cd pdolite
 
