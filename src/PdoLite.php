@@ -183,13 +183,13 @@ class PdoLite {
     }
 
     /* 
-     * call query and dbFetch assoc to get one row 
+     * call query and dbFetch array type to get one row 
      * @param $sql  
      * @return array of one row 
      */ 
-    public static function row2Array($sql) {
+    public static function row2Array($sql, $atype = "num") {
 
-        return self::dbFetch(self::query($sql), "assoc");
+        return self::dbFetch(self::query($sql), $atype);
     }
 
     /* 
