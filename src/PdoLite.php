@@ -724,7 +724,7 @@ class PdoLite {
     public static function select($tname, $options=array()) {
 
         try {      
-            $otype = self::getKeyVal($options, 'type', 'num');
+            $otype = self::getKeyVal($options, 'type', 'assoc');
             $all = self::getKeyVal($options, 'all');
             $sql = self::qbSelect($tname, $options);
             if (strtolower($all)=="all") {
