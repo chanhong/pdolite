@@ -73,7 +73,6 @@ class PdoLite {
     final public static function __callStatic( $chrMethod, $arrArguments ) { 
 
         $objInstance = self::getInstance(); 
-        
         return call_user_func_array(array($objInstance, $chrMethod), $arrArguments); 
     } # end method 
 
@@ -85,7 +84,6 @@ class PdoLite {
     final public function __call( $chrMethod, $arrArguments ) {
 
         $objInstance = self::getInstance(); 
-        
         return call_user_func_array(array($objInstance, $chrMethod), $arrArguments); 
     } # end method 
     
@@ -160,6 +158,7 @@ class PdoLite {
 		}
     }
 
+    // various methods ultilized dbFetch
     /* 
      * call query and dbFetch num to get lastID 
      * @param $table, $field 
@@ -167,9 +166,13 @@ class PdoLite {
      */ 
     public static function getLastId($table, $field) {
 
-        $sql = 'SELECT max(' . $field . ') as lastid FROM ' . $table;
-        list($lastid) = self::dbFetch(self::query($sql), "num"); // cause warning when use assoc array
-        return (int) $lastid;
+        try {
+            $sql = 'SELECT max(' . $field . ') as lastid FROM ' . $table;
+            list($lastid) = self::dbFetch(self::query($sql), "num"); // cause warning when use assoc array
+            return (int) $lastid;
+        } catch (Exception $e) {
+            echo $e->getTraceAsString();
+        }        
     }
 
     /* 
@@ -317,28 +320,32 @@ class PdoLite {
 
     public static function getPDOFetchType($atype) {
         
-        switch ($atype) {
-            case 'obj':
-                $type = PDO::FETCH_OBJ;
-                break;
-            case 'lazy':
-                $type = PDO::FETCH_LAZY;
-                break;
-            case 'both':
-                $type = PDO::FETCH_BOTH;
-                break;
-            case 'array':
-            case 'assoc':
-                $type = PDO::FETCH_ASSOC;
-                break;
-            case '':
-            case 'num':
-            case 'value':
-            default:
-                $type = PDO::FETCH_NUM;
-                break;
-        }
-        return $type;
+        try {
+            switch ($atype) {
+                case 'obj':
+                    $type = PDO::FETCH_OBJ;
+                    break;
+                case 'lazy':
+                    $type = PDO::FETCH_LAZY;
+                    break;
+                case 'both':
+                    $type = PDO::FETCH_BOTH;
+                    break;
+                case 'array':
+                case 'assoc':
+                    $type = PDO::FETCH_ASSOC;
+                    break;
+                case '':
+                case 'num':
+                case 'value':
+                default:
+                    $type = PDO::FETCH_NUM;
+                    break;
+            }
+            return $type;
+        } catch (Exception $e) {
+            echo $e->getTraceAsString();
+        }        
     }
 
     /* 
@@ -369,13 +376,17 @@ class PdoLite {
      */ 
     public static function fieldsKey($table, $filter="id") {
 
-        $row = (array) self::findRow("select * from ".$table,"assoc");
-        // remove array element base on filter if _none_ no filter
-        if (strtolower($filter)!="_none_") {
-            // default is to filter id field
-            unset($row[$filter]);
-        }
-        return array_keys($row);
+        try {
+            $row = (array) self::findRow("select * from ".$table, "assoc");
+            // remove array element base on filter if _none_ no filter
+            if (strtolower($filter)!="_none_") {
+                // default is to filter id field
+                unset($row[$filter]);
+            }
+            return array_keys($row);
+        } catch (Exception $e) {
+            echo $e->getTraceAsString();
+        }        
     }
 
     /* 
@@ -384,8 +395,12 @@ class PdoLite {
      * @return assoc array of fields Array ( [name] => 0 [biography] => 1 ) 
      */ 
     public static function schema($table, $filter="id") {
-    
-        return array_flip(self::fieldsKey($table, $filter));
+
+        try {    
+            return array_flip(self::fieldsKey($table, $filter));
+        } catch (Exception $e) {
+            echo $e->getTraceAsString();
+        }        
     }
 
     /* 
@@ -394,13 +409,18 @@ class PdoLite {
      * @return assoc array of fields 
      */ 
     public static function aIntersec($iArray, $allowArray = array()) {
+
+        try {        
+            $return = $iArray; 
+            // if empty do not filter the array
+            if (!empty($allowArray)) {
+                $return = array_intersect_key($iArray, array_flip($allowArray)); 
+            }   
+            return $return; 
+        } catch (Exception $e) {
+            echo $e->getTraceAsString();
+        }        
         
-        $return = $iArray; 
-        // if empty do not filter the array
-        if (!empty($allowArray)) {
-            $return = array_intersect_key($iArray, array_flip($allowArray)); 
-        }   
-        return $return; 
     }
 
      /* filterBySchema might be better, to decide delete this later (TODO)
@@ -423,15 +443,20 @@ class PdoLite {
      * @return filtered field Array ( [name] => some name [biography] => some bio ) 
      */ 
     public static function filterBySchema($tname, $iArray) {
-    
-        $fields = self::schema($tname,"_none_");
-        // diff in array with schma fields
-        $diffs = array_diff_key($iArray, $fields);
-        // remove unwanted fields
-        foreach ($diffs as $k=>$v) {
-            unset($iArray[$k]);
-        }
-        return $iArray;                
+
+        try {    
+            $fields = self::schema($tname,"_none_");
+            // diff in array with schma fields
+            $diffs = array_diff_key($iArray, $fields);
+            // remove unwanted fields
+            foreach ($diffs as $k=>$v) {
+                unset($iArray[$k]);
+            }
+            return $iArray;    
+        } catch (Exception $e) {
+            echo $e->getTraceAsString();
+        }        
+                    
     }
 
      /* 
@@ -753,6 +778,44 @@ class PdoLite {
 		} catch (PDOException $e) {
             die(self::dbError($tname));
 		}
+    }
+
+    // misc methods utilize select
+    /* 
+     * call dbRow to get value of table field 
+     * @param $table, $field, $where 
+     * @return field value 
+     */ 
+    public static function dbField($table, $field, $where) {
+
+        $fldValue = "";
+        $row = self::dbRow($table, ['type'=>'num', 'fl'=>$field, 'where'=>$where]);
+        if (!empty($row)) {
+            list($fldValue) = $row;
+        }
+        return $fldValue;
+    }
+
+    /* 
+     * call select to get one row 
+     * @param $table, $field, $where 
+     * @return field value 
+     */ 
+    public static function dbRow($tname, $options=array()) {
+
+        try {
+            $row = array();
+            $defArray = ['type'=>'assoc', 'all'=>'all'];
+            // options array will override the default array
+            $coptions = array_merge($defArray, $options);
+            $rows = self::select($tname, $coptions);
+            if (!empty($rows)) {
+                $row = array_shift($rows); // get top one array
+            }
+            return $row;
+        } catch (Exception $e) {
+            echo $e->getTraceAsString();
+        }        
     }
 
 } 

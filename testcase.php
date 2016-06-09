@@ -23,67 +23,70 @@ $iArray =[ 'idx'=>0, 'name' => 'some name', 'biography' => 'some bio'
 
 // SUDI: select, update, insert, delete test case
 echo "<p />rows2array-bef";
-PdoLite::pln(PdoLite::select("authors"),"select-bef");
+$db->pln($db->select("authors"),"select-bef");
 $sqlUpdList = ['biography'=>'Suzanne Marie Collins is an American television writer and novelist, best known as the author of The Underland Chronicles and The Hunger Games trilogy'];
-PdoLite::pln(PdoLite::update("authors", ['fl'=>$sqlUpdList, 'where'=>'id=1']),"update");
+$db->pln($db->update("authors", ['fl'=>$sqlUpdList, 'where'=>'id=1']),"update");
 $fldList = ['name'=>"t'est",'biography'=>"t'est insert"];
-PdoLite::pln(PdoLite::insert("authors", ['fl'=>$fldList]),"insert");
+$db->pln($db->insert("authors", ['fl'=>$fldList]),"insert");
 $lastid=$db->getLastId("authors","id");
-PdoLite::pln(PdoLite::select("authors", ['where'=>"id=$lastid"]),"RS of last insert: $lastid");
-PdoLite::pln(PdoLite::delete("authors", ['where'=>"id=$lastid"]),"deleted $lastid");
-PdoLite::pln(PdoLite::select("authors"),"select-aft");
+$db->pln($db->select("authors", ['where'=>"id=$lastid"]),"RS of last insert: $lastid");
+$db->pln($db->delete("authors", ['where'=>"id=$lastid"]),"deleted $lastid");
+$db->pln($db->select("authors"),"select-aft");
 echo "<br />rows2array-after";
 
 // various select test case
-PdoLite::pln(PdoLite::select("authors", ['fl'=>'name','type'=>'both','where'=>'id=1']),"both-name",'p');
-PdoLite::pln(PdoLite::select("authors", ['fl'=>'id, name,xid','where'=>'id=1']),"name,xid");
-PdoLite::pln(PdoLite::select("authors", ['fl'=>$iArray,'type'=>'num','where'=>'id=1']),"num");
-PdoLite::pln(PdoLite::select("books", ['where'=>'id<3']),"assoc");
-PdoLite::pln(PdoLite::select("books", ['where'=>'id<3','all'=>'all']),"all-assoc");
+$db->pln($db->select("authors", ['fl'=>'name','type'=>'both','where'=>'id=1']),"both-name",'p');
+$db->pln($db->select("authors", ['fl'=>'id, name,xid','where'=>'id=1']),"name,xid");
+$db->pln($db->select("authors", ['fl'=>$iArray,'type'=>'num','where'=>'id=1']),"num");
+$db->pln($db->select("books", ['where'=>'id<3']),"assoc");
+$db->pln($db->select("books", ['where'=>'id<3','all'=>'all']),"all-assoc");
+
+$db->pln($db->dbRow("authors", ['where'=>'id=1']), 'dbRow');
+$db->pln($db->dbField("authors", "name", 'id=1'), 'dbFieldValue');
 
 // schema test case
-$fields = PdoLite::fieldsKey("authors","_none");
-PdoLite::pln($fields,"schema",'p');
-$one = PdoLite::filterBySchema("authors", $iArray);
-PdoLite::pln($one,"schema filter");
-PdoLite::pln($db->getNextId("books","id"),"next books id");
+$fields = $db->fieldsKey("authors","_none");
+$db->pln($fields,"schema",'p');
+$one = $db->filterBySchema("authors", $iArray);
+$db->pln($one,"schema filter");
+$db->pln($db->getNextId("books","id"),"next books id");
 
 // array to string
-PdoLite::pln(PdoLite::a2sSelect($one),"select");
-PdoLite::pln(PdoLite::a2sInsert($one),"insert");
-PdoLite::pln(PdoLite::a2sUpdate($one),"update");
-PdoLite::pln(PdoLite::a2sSelect($iArray),"select");
+$db->pln($db->a2sSelect($one),"select");
+$db->pln($db->a2sInsert($one),"insert");
+$db->pln($db->a2sUpdate($one),"update");
+$db->pln($db->a2sSelect($iArray),"select");
 
 // old test case
-$sql = PdoLite::qbSelect("books", ['where'=>"id <3"]);
-PdoLite::pln($sql,"sql");
-echo "<p />_call dbFetch";
-PdoLite::pln(PdoLite::row2Array($sql),"row2array-num"); 
-PdoLite::pln(PdoLite::row2Array($sql,"assoc"),"row2array-assoc"); 
-PdoLite::pln($db->dbFetchAssoc($db->query($sql)),"dbFetchAssoc"); 
-echo "<br />__callStatic dbFetch: ";
-PdoLite::pln(PdoLite::dbFetchRow(PdoLite::query($sql)),"row"); 
+$sql = $db->qbSelect("books", ['where'=>"id <3"]);
+$db->pln($sql,"sql");
+echo "<p />Samples use object _call dbFetch";
+$db->pln($db->row2Array($sql),"row2array-num"); 
+$db->pln($db->row2Array($sql,"assoc"),"row2array-assoc"); 
+$db->pln($db->dbFetchAssoc($db->query($sql)),"dbFetchAssoc"); 
+echo "<br />Samples use static __callStatic dbFetch: ";
+$db->pln(PdoLite::dbFetchRow(PdoLite::query($sql)),"row"); 
 $arr = PdoLite::dbFetchArray(PdoLite::query($sql)); 
-PdoLite::pln($arr,"both"); 
-PdoLite::pln(array_values($arr),"value"); 
+$db->pln($arr,"both"); 
+$db->pln(array_values($arr),"value"); 
 
-$sql = PdoLite::qbSelect("books", ['where'=>"id <3"]);
+$sql = $db->qbSelect("books", ['where'=>"id <3"]);
 echo "<p />dbFetch obj: ";
-$res = PdoLite::query($sql);
-while ($row = PdoLite::dbFetch($res, "obj")) { 
-    PdoLite::prt($row->id,"id"); 
+$res = $db->query($sql);
+while ($row = $db->dbFetch($res, "obj")) { 
+    $db->prt($row->id,"id"); 
 }   
 echo "<br />dbFetch lazy: ";
-$res = PdoLite::query($sql);
-while ($row = PdoLite::dbFetch($res, "lazy")) { 
-    PdoLite::prt($row->id,"id"); 
+$res = $db->query($sql);
+while ($row = $db->dbFetch($res, "lazy")) { 
+    $db->prt($row->id,"id"); 
 }   
 
-foreach (PdoLite::query($sql) as $row) {
-    PdoLite::pln($row,"foreach obj"); 
-    PdoLite::prt($row['id'],"id"); 
+foreach ($db->query($sql) as $row) {
+    $db->pln($row,"foreach obj"); 
+    $db->prt($row['id'],"id"); 
 }
 
 $sql = "SELECT * FROM books where id =1"; 
-PdoLite::pln(PdoLite::findRow($sql, "lazy"),"findRow lazy"); 
-PdoLite::pln(PdoLite::findRow($sql),"findRow obj"); 
+$db->pln($db->findRow($sql, "lazy"),"findRow lazy"); 
+$db->pln($db->findRow($sql),"findRow obj"); 
