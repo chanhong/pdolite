@@ -565,16 +565,20 @@ class PdoLite {
     
      /* 
      * array to fields list for sql update
-     * @param $array  
+     * @param $array $checkNumArray 
      * @return string 
      */ 
-    public static function a2sUpdate($iArray) {
+    public static function a2sUpdate($iArray, $checkNumArray = array()) {
 
         $str = "";
         while (list($key, $val) = each($iArray)) {
             if (empty($val) and (gettype($val)=="integer" or gettype($val)=="double")) {
                 $val = "0"; 
             }
+            if (isset($checkNumArray[$key]) and $key == $checkNumArray[$key] and empty($val)) {
+                $val = "0"; // set to "0" only in the $checkNumArray and is empty
+            }
+            
             // concat fields list for sql update
             // use single quote to work around sqlsrv error
             $str .= $key . " ='" . self::escapeQuote($val) . "', ";
