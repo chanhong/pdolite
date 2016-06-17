@@ -572,16 +572,14 @@ class PdoLite {
 
         $str = "";
         while (list($key, $val) = each($iArray)) {
-            if (empty($val) and (gettype($val)=="integer" or gettype($val)=="double")) {
-                $val = "0"; 
-            }
             if (isset($checkNumArray[$key]) and $key == $checkNumArray[$key] and empty($val)) {
-                $val = "0"; // set to "0" only in the $checkNumArray and is empty
+               $val = 0; // set to 0 only in the $checkNumArray and is empty
+            } else {
+               $val = self::escapeQuote($val);
             }
-            
             // concat fields list for sql update
             // use single quote to work around sqlsrv error
-            $str .= $key . " ='" . self::escapeQuote($val) . "', ";
+            $str .= $key . " ='" . $val . "', ";
         }
         // return maker= 'Name', acct= '15',
         return substr($str, 0, strlen($str) - 2); // take out comma and space
