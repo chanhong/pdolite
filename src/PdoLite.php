@@ -685,11 +685,12 @@ class PdoLite {
             $iFldList = self::getKeyVal($options, 'fl');
             $where = self::getKeyVal($options, 'where');
             $otype = self::getKeyVal($options, 'type');
+            $checkNum = self::getKeyVal($options, 'setNum');
             
             switch (strtolower($opr)) {
                 case "update":
                     if (!empty($iFldList) and is_array($iFldList)) {
-                        $fldList = self::a2sUpdate(self::filterBySchema($tname, $iFldList));
+                        $fldList = self::a2sUpdate(self::filterBySchema($tname, $iFldList),$checkNum);
                     }
                     break;
                 case "insert":
