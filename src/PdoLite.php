@@ -592,10 +592,21 @@ class PdoLite {
      */ 
     public static function a2sInsert($iArray) {
 
-        // must use this in case quote in the name
-        $value = "'" . implode("', '", array_values(self::escapeQuote($iArray))) . "'"; 
-        $name = implode(", ", array_keys($iArray));
-        return "($name) VALUES ($value)";
+        $nameStr = $valStr = "";
+        while (list($key, $val) = each($iArray)) {
+            $nameStr .= $key . ", ";
+            if (!empty($val)) {
+                // must use this in case quote in the name
+                $valStr .= "'" . self::escapeQuote($val) . "', "; 
+            } else {
+                // null is cross platform value for empty field
+                $valStr .= "null, ";
+            }
+        }
+        // take out comma and space
+        $nameStr = substr($nameStr, 0, strlen($nameStr) - 2); 
+        $valStr = substr($valStr, 0, strlen($valStr) - 2); 
+        return "($nameStr) VALUES ($valStr)";
     }   
 
     // SIDU Query builder lite
