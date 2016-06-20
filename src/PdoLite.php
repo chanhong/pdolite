@@ -111,7 +111,7 @@ class PdoLite {
     */    
     public static function dbError($msg = "") {
         
-            return '<pre>' . $msg. $e->getMessage() . '</pre><br />' . $this->backTrace();            
+        return '<pre>' . $msg. $e->getMessage() . '</pre><br />' . $this->backTrace();            
     }
 
     /* 
@@ -153,9 +153,9 @@ class PdoLite {
         
         try {
             return self::query($sql);   
-		} catch (PDOException $e) {
+        } catch (PDOException $e) {
             die(self::dbError($sql));
-		}
+        }
     }
 
     // various methods ultilized dbFetch
@@ -217,9 +217,9 @@ class PdoLite {
                 $type = self::getPDOFetchType($atype);
                 return $qhandle->fetch($type);
             }
-		} catch (PDOException $e) {
+        } catch (PDOException $e) {
             die(self::dbError(__METHOD__));
-		}
+        }
     }
 
     // alias method
@@ -295,9 +295,9 @@ class PdoLite {
                     return $myrows;
                 }
             }
-		} catch (PDOException $e) {
+        } catch (PDOException $e) {
             die(self::dbError($sql));
-		}
+        }
     }
 
     /* 
@@ -313,9 +313,9 @@ class PdoLite {
                 $type = self::getPDOFetchType($atype);
                 return $res->fetchAll($type);
             }
-		} catch (PDOException $e) {
+        } catch (PDOException $e) {
             die(self::dbError($sql));
-		}
+        }
     }
 
     public static function getPDOFetchType($atype) {
@@ -485,8 +485,8 @@ class PdoLite {
         
         // clean \' into single quote before double it
         (!empty($iArray)) 
-        ? $ret = str_replace("'", "''", str_replace("\'", "'", $iArray)) 
-        : $ret = "";
+            ? $ret = str_replace("'", "''", str_replace("\'", "'", $iArray)) 
+            : $ret = "";
         return $ret;
     }
     
@@ -572,8 +572,9 @@ class PdoLite {
 
         $str = "";
         while (list($key, $val) = each($iArray)) {
-            if (isset($checkNumArray[$key]) and $key == $checkNumArray[$key] and empty($val)) {
-               $val = 0; // set to 0 only in the $checkNumArray and is empty
+            // override value from checkNumArray value of the same key
+            if (isset($checkNumArray[$key]) and empty($val)) {
+               $val = $checkNumArray[$key]; // set to value of $checkNumArray when value is empty
             } else {
                $val = self::escapeQuote($val);
             }
@@ -626,8 +627,8 @@ class PdoLite {
             : $where = "";
             
         (empty($one['fl'])) 
-        ? $iFldList = "*"
-        : $iFldList = $one['fl']
+            ? $iFldList = "*"
+            : $iFldList = $one['fl']
         ;
         
         return "SELECT " . $iFldList
@@ -725,9 +726,9 @@ class PdoLite {
                     }
             }
             return ['fl'=>$fldList, 'where'=>$where, 'type'=>$otype];
-		} catch (PDOException $e) {
+        } catch (PDOException $e) {
             die(self::dbError($tname));
-		}
+        }
     }
 
      /* 
@@ -747,9 +748,9 @@ class PdoLite {
                 $return = self::rows2Array($sql, $otype);
             }
             return  $return; 
-		} catch (PDOException $e) {
+        } catch (PDOException $e) {
             die(self::dbError($tname));
-		}
+        }
     }
 
      /* 
@@ -761,9 +762,9 @@ class PdoLite {
 
         try {        
             return PdoLite::exec(self::qbInsert($tname, $options));
-		} catch (PDOException $e) {
+        } catch (PDOException $e) {
             die(self::dbError($tname));
-		}
+        }
     }
 
      /* 
@@ -775,9 +776,9 @@ class PdoLite {
         
         try {        
             return PdoLite::exec(self::qbDelete($tname, $options));
-		} catch (PDOException $e) {
+        } catch (PDOException $e) {
             die(self::dbError($tname));
-		}
+        }
     }
 
      /* 
@@ -789,9 +790,9 @@ class PdoLite {
         
         try {        
             return PdoLite::exec(self::qbUpdate($tname, $options));
-		} catch (PDOException $e) {
+        } catch (PDOException $e) {
             die(self::dbError($tname));
-		}
+        }
     }
 
     // misc methods utilize select
