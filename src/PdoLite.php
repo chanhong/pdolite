@@ -562,19 +562,20 @@ class PdoLite {
 
         return implode(", ", array_keys($iArray));
     }
-    
+
      /* 
      * array to fields list for sql update
      * @param $array $checkNumArray 
      * @return string 
      */ 
-    public static function a2sUpdate($iArray, $checkNumArray = array()) {
+    public static function a2sUpdate($iArray, $defaultArray = array()) {
 
         $str = "";
         while (list($key, $val) = each($iArray)) {
-            // override value from checkNumArray value of the same key
-            if (isset($checkNumArray[$key]) and empty($val)) {
-               $val = $checkNumArray[$key]; // set to value of $checkNumArray when value is empty
+            // override value from $defaultArray value of the same key
+            if (empty($val) and isset($defaultArray[$key])) {
+                // set to value of $defaultArray when value is empty
+               $val = $defaultArray[$key]; 
             } else {
                $val = self::escapeQuote($val);
             }
@@ -591,21 +592,21 @@ class PdoLite {
      * @param $array  
      * @return string (title, maker) VALUES ("Title","Maker")
      */ 
-    public static function a2sInsert($iArray) {
-
+    public static function a2sInsert($iArray, $defaultArray = array()) {
         $nameStr = $valStr = "";
         while (list($key, $val) = each($iArray)) {
-            $nameStr .= $key . ", ";
-            if (!empty($val)) {
-                // must use this in case quote in the name
-                $valStr .= "'" . self::escapeQuote($val) . "', "; 
+            // use single quote to work around sqlsrv error
+            // override value from $defaultArray value of the same key
+            if (empty($val) and isset($defaultArray[$key])) {
+               $valStr .= "'" .  $defaultArray[$key] . "', ";
+            } elseif (!empty($val)) {
+               $valStr .= "'" .  self::escapeQuote($val).  "', ";
             } else {
-                // null is cross platform value for empty field
-                $valStr .= "null, ";
+               $valStr .= "null, ";
             }
         }
+        $nameStr = implode(", ", array_keys($iArray));       
         // take out comma and space
-        $nameStr = substr($nameStr, 0, strlen($nameStr) - 2); 
         $valStr = substr($valStr, 0, strlen($valStr) - 2); 
         return "($nameStr) VALUES ($valStr)";
     }   
@@ -697,12 +698,12 @@ class PdoLite {
             $iFldList = self::getKeyVal($options, 'fl');
             $where = self::getKeyVal($options, 'where');
             $otype = self::getKeyVal($options, 'type');
-            $checkNum = self::getKeyVal($options, 'setNum');
+            $defaultArray = self::getKeyVal($options, 'default');
             
             switch (strtolower($opr)) {
                 case "update":
                     if (!empty($iFldList) and is_array($iFldList)) {
-                        $fldList = self::a2sUpdate(self::filterBySchema($tname, $iFldList),$checkNum);
+                        $fldList = self::a2sUpdate(self::filterBySchema($tname, $iFldList), $defaultArray);
                     }
                     break;
                 case "insert":
@@ -711,7 +712,7 @@ class PdoLite {
                         $iFldList = array_flip(explode(",", str_replace(' ','',$iFldList)));
                     } 
                     if (!empty($iFldList) and is_array($iFldList)) {
-                        $fldList = self::a2sInsert(self::filterBySchema($tname, $iFldList));
+                        $fldList = self::a2sInsert(self::filterBySchema($tname, $iFldList), $defaultArray);
                     }
                     break;
                 case "select":
