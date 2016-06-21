@@ -581,7 +581,7 @@ class PdoLite {
             // catch the case of integer val=0
             } elseif (isset($val) and empty($val) and gettype($val)<>"string") {
                $val = $val;
-            } elseif (!empty($val)) {
+            } else {
                $val = self::escapeQuote($val);
             } 
             // concat fields list for sql update
@@ -600,6 +600,7 @@ class PdoLite {
      */ 
     public static function a2sInsert($iArray, $defaultArray = array()) {
         $nameStr = $valStr = "";
+//        self::pln($iArray,"ns");
         while (list($key, $val) = each($iArray)) {
 //            self::pln(gettype($val),"t=$key");
             // use single quote to work around sqlsrv error
