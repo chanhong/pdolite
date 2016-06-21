@@ -571,17 +571,23 @@ class PdoLite {
     public static function a2sUpdate($iArray, $defaultArray = array()) {
 
         $str = "";
+//        self::pln($iArray,"ns");
         while (list($key, $val) = each($iArray)) {
+//            self::pln(gettype($val),"t=$key");
             // override value from $defaultArray value of the same key
             if (empty($val) and isset($defaultArray[$key])) {
                 // set to value of $defaultArray when value is empty
                $val = $defaultArray[$key]; 
-            } else {
+            // catch the case of integer val=0
+            } elseif (isset($val) and empty($val) and gettype($val)<>"string") {
+               $val = $val;
+            } elseif (!empty($val)) {
                $val = self::escapeQuote($val);
-            }
+            } 
             // concat fields list for sql update
             // use single quote to work around sqlsrv error
             $str .= $key . " ='" . $val . "', ";
+//            self::pln($str,"vs");
         }
         // return maker= 'Name', acct= '15',
         return substr($str, 0, strlen($str) - 2); // take out comma and space
@@ -595,17 +601,24 @@ class PdoLite {
     public static function a2sInsert($iArray, $defaultArray = array()) {
         $nameStr = $valStr = "";
         while (list($key, $val) = each($iArray)) {
+//            self::pln(gettype($val),"t=$key");
             // use single quote to work around sqlsrv error
             // override value from $defaultArray value of the same key
             if (empty($val) and isset($defaultArray[$key])) {
                $valStr .= "'" .  $defaultArray[$key] . "', ";
+            // catch the case of integer val=0
+            } elseif (isset($val) and empty($val) and gettype($val)<>"string") {
+               $valStr .= "'$val', ";
             } elseif (!empty($val)) {
                $valStr .= "'" .  self::escapeQuote($val).  "', ";
+            // catch the case of null in date field
             } else {
                $valStr .= "null, ";
             }
         }
         $nameStr = implode(", ", array_keys($iArray));       
+//        self::pln($nameStr,"ns");
+//        self::pln($valStr,"vs");
         // take out comma and space
         $valStr = substr($valStr, 0, strlen($valStr) - 2); 
         return "($nameStr) VALUES ($valStr)";
