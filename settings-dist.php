@@ -31,5 +31,5 @@ $sqlite = array(
     'dbpass' => "",
 );
 
-$db = $sqlsrv;
+$db = $sqlite;
 $cfg = array_merge($db, $param);
