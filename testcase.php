@@ -14,6 +14,7 @@ PdoLite::$cfg = $cfg;
 defined('PDOLITE_DB_DSN') or define('PDOLITE_DB_DSN', PdoLite::$cfg['dsn']);
 defined('PDOLITE_DB_USER') or define('PDOLITE_DB_USER', PdoLite::$cfg['dbuser']);
 defined('PDOLITE_DB_PASS') or define('PDOLITE_DB_PASS',PdoLite::$cfg['dbpass']);
+defined('PDOLITE_DB_TYPE') or define('PDOLITE_DB_TYPE',PdoLite::$cfg['dbtype']);
 
 $db = new PdoLite();
 $db->dbConnect(PdoLite::$cfg['dsn'], PdoLite::$cfg['dbuser'], PdoLite::$cfg['dbpass']);
@@ -90,3 +91,8 @@ foreach ($db->query($sql) as $row) {
 $sql = "SELECT * FROM books where id =1"; 
 $db->pln($db->findRow($sql, "lazy"),"findRow lazy"); 
 $db->pln($db->findRow($sql),"findRow obj"); 
+$sql = $db->dbtypeSqlSelectRange(['dbtype'=>PdoLite::$cfg['dbtype'],
+'tbl'=>'books','where'=>"id >2 order by id", 'limit'=>3]);  
+$db->pln(PdoLite::rows2Array($sql),"select range"); 
+$db->pln(PdoLite::$cfg['dbtype']);
+

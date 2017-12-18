@@ -848,4 +848,70 @@ class PdoLite {
         }        
     }
 
+    /* 
+     * get query string for string to date based on dbtype such as 'pdo-mysql' or 'pdo-sqlsrv'
+     * @param array('dbtype'=>'pdo-mysql','fieldname'=>'first', 'format'=>'%d/%d/%y')
+     * @return string 
+     */ 
+    public function dbtypeSqlStr2Date($one) {
+            
+        if (empty($one['fieldname'])) return;
+        
+        if (empty($one['format'])) {
+            $one['format'] = "%m/%d/%y";
+        } 
+        
+        switch (strtolower($one['dbtype'])) {
+            case "pdo-sqlsrv":
+                $ret = "CONVERT(DATETIME, ".$one['fieldname'].")";
+                break;
+            default:
+            case "pdo-mysql":
+                $ret = "STR_TO_DATE(".$one['fieldname'].", '".$one['format']."')";
+                break;
+        }
+            return $ret;
+    }
+            
+    /* 
+     * get query string for select date range based on dbtype such as 'pdo-mysql' or 'pdo-sqlsrv' MUST have order by in WHERE to work
+     * @param array('dbtype'=>'pdo-mysql','tbl'=>'tname', ,'fl'=>'*', 'where'=>'id=1 order by id', 'start'=>1, 'limit'=>10)
+     * @return string 
+     */ 
+    public function dbtypeSqlSelectRange($one) {
+            
+        if (empty($one['tbl']) or empty($one['where'])) return;
+
+        if (empty($one['fl'])) {
+            $one['fl'] = "*";
+        } 
+        
+        if (empty($one['start'])) {
+            $one['start'] = 0;
+        } 
+
+        if (empty($one['limit'])) {
+            $one['limit'] = 1;
+        }
+        
+        switch (strtolower($one['dbtype'])) {
+            case "pdo-sqlsrv":
+                // require > SQL 2012 
+                $ret = "SELECT ".$one['fl']
+                    . " FROM ".$one['tbl']
+                    . " WHERE ".$one['where']
+                    . " OFFSET ".$one['start']." ROWS "
+                    . " FETCH NEXT ".$one['limit']." ROWS ONLY"
+                    ;
+                break;
+            default:
+            case "pdo-mysql":
+                $ret = "SELECT ".$one['fl'].", @rownum:=@rownum+1 RowNumber "
+                    . " FROM ".$one['tbl'].", (SELECT @rownum:=0) r "
+                    . " WHERE ".$one['where']." LIMIT ".$one['limit']." OFFSET ".$one['start'].";"
+                    ;
+                break;
+        }
+        return $ret;
+    }
 } 

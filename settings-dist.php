@@ -4,14 +4,14 @@ $param = array(
 );
 
 $mysql = array(
-    'dbtype' => "mysql",
+    'dbtype' => "pdo-mysql",
     'dsn' => 'mysql:host=localhost;port=3306;dbname=bookshelf',
     'dbuser' => 'user',
     'dbpass' => 'password',
 );
 
 $sqlsrv = array(
-    'dbtype' => "sqlsrv",
+    'dbtype' => "pdo-sqlsrv",
     'dsn' => 'sqlsrv:server=(local);Database=bookshelf',
     'dbuser' => 'user',
     'dbpass' => 'password',
