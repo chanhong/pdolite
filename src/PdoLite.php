@@ -852,15 +852,20 @@ class PdoLite {
      * get query string for string to date based on dbtype such as 'pdo-mysql' or 'pdo-sqlsrv'
      * @param array('dbtype'=>'pdo-mysql','fieldname'=>'first', 'format'=>'%d/%d/%y')
      * @return string 
+     * sqlite date string must be in ths format "%Y-%m-%d" such '2017-12-01' then use date between
      */ 
     public function dbtypeSqlStr2Date($one) {
             
         if (empty($one['fieldname'])) return;
+
+        if (empty($one['dbtype'])) {
+            $one['dbtype'] = "pdo-mysql";
+        } 
         
         if (empty($one['format'])) {
             $one['format'] = "%m/%d/%y";
         } 
-        
+
         switch (strtolower($one['dbtype'])) {
             case "pdo-sqlsrv":
                 $ret = "CONVERT(DATETIME, ".$one['fieldname'].")";
@@ -882,6 +887,10 @@ class PdoLite {
             
         if (empty($one['tbl']) or empty($one['where'])) return;
 
+        if (empty($one['dbtype'])) {
+            $one['dbtype'] = "pdo-mysql";
+        } 
+        
         if (empty($one['fl'])) {
             $one['fl'] = "*";
         } 
@@ -904,17 +913,17 @@ class PdoLite {
                     . " FETCH NEXT ".$one['limit']." ROWS ONLY"
                     ;
                 break;
-            case "pdo-mysql":
-                $ret = "SELECT ".$one['fl'].", @rownum:=@rownum+1 RowNumber "
-                    . " FROM ".$one['tbl'].", (SELECT @rownum:=0) r "
-                    . " WHERE ".$one['where']." LIMIT ".$one['limit']." OFFSET ".$one['start'].";"
-                    ;
-                break;
-            default:
             case "sqlite":
                 $ret = "SELECT ".$one['fl']
                     . " FROM ".$one['tbl']
                     . " WHERE ".$one['where']." LIMIT ".$one['start'].", ".$one['limit'].";"
+                    ;
+                break;
+            default:
+            case "pdo-mysql":
+                $ret = "SELECT ".$one['fl'].", @rownum:=@rownum+1 RowNumber "
+                    . " FROM ".$one['tbl'].", (SELECT @rownum:=0) r "
+                    . " WHERE ".$one['where']." LIMIT ".$one['limit']." OFFSET ".$one['start'].";"
                     ;
                 break;
             }
