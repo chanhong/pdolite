@@ -904,14 +904,20 @@ class PdoLite {
                     . " FETCH NEXT ".$one['limit']." ROWS ONLY"
                     ;
                 break;
-            default:
             case "pdo-mysql":
                 $ret = "SELECT ".$one['fl'].", @rownum:=@rownum+1 RowNumber "
                     . " FROM ".$one['tbl'].", (SELECT @rownum:=0) r "
                     . " WHERE ".$one['where']." LIMIT ".$one['limit']." OFFSET ".$one['start'].";"
                     ;
                 break;
-        }
+            default:
+            case "sqlite":
+                $ret = "SELECT ".$one['fl']
+                    . " FROM ".$one['tbl']
+                    . " WHERE ".$one['where']." LIMIT ".$one['start'].", ".$one['limit'].";"
+                    ;
+                break;
+            }
         return $ret;
     }
 } 
